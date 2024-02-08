@@ -4,6 +4,7 @@ import './App.css';
 
 function App() {
   const [products, setProducts] = useState([]);
+  const [modifiedData, setModifiedData] = useState([]);
 
   useEffect(() => {
     axios.get('https://seagale.fr/api/products?ws_key=24UCBP8LSPL5EWHZVI2VDSZMRSU7EITZ&filter[active]=[1]&display=full&output_format=JSON')
@@ -27,18 +28,7 @@ function App() {
       .catch(error => console.error('Erreur lors de la récupération des données', error));
   }, []);
 
-  const handleInputChange = (e, index, key) => {
-    const newProducts = [...products];
-    const { zone, famille, rang } = newProducts[index]; // Récupération des valeurs actuelles
-    newProducts[index][key] = e.target.value;
-    // Si la clé est 'zone', 'famille' ou 'rang', mettre à jour la référence
-    if (key === 'zone' || key === 'famille' || key === 'rang') {
-      newProducts[index].reference = `${newProducts[index].zone || zone}.${newProducts[index].famille || famille}.${newProducts[index].rang || rang}`;
-      setProducts(newProducts); // Mise à jour des produits
-    }
-  };
-
-  const handleBlur = () => {
+  const handleBlur = (id, reference) => {
     // Réorganiser les produits après modification
     const sortedProducts = products.sort((a, b) => {
       const refA = a.reference.split('.');
@@ -53,6 +43,16 @@ function App() {
       return parseInt(refA[2], 10) - parseInt(refB[2], 10);
     });
     setProducts([...sortedProducts]); // Mise à jour des produits triés
+    setModifiedData(prevData => [...prevData, { id, reference }]);
+  };
+
+  useEffect(() => {
+    console.log(modifiedData);
+  }, [modifiedData]);
+
+  const handleButtonClick = () => {
+    // Action à exécuter lors du clic sur le bouton
+    console.log('Bouton cliqué !');
   };
 
   return (
@@ -86,7 +86,7 @@ function App() {
                       const newProducts = [...products];
                       newProducts[index].reference = `${newZone}.${famille}.${rang}`;
                       setProducts(newProducts);
-                      handleBlur();
+                      handleBlur(product.id, newProducts[index].reference);
                     }}
                   />
                 </td>
@@ -99,7 +99,7 @@ function App() {
                       const newProducts = [...products];
                       newProducts[index].reference = `${zone}.${newFamille}.${rang}`;
                       setProducts(newProducts);
-                      handleBlur();
+                      handleBlur(product.id, newProducts[index].reference);
                     }}
                   />
                 </td>
@@ -112,7 +112,7 @@ function App() {
                       const newProducts = [...products];
                       newProducts[index].reference = `${zone}.${famille}.${newRang}`;
                       setProducts(newProducts);
-                      handleBlur();
+                      handleBlur(product.id, newProducts[index].reference);
                     }}
                   />
                 </td>
@@ -122,6 +122,15 @@ function App() {
           })}
         </tbody>
       </table>
+      <button className="bottom-right-button" onClick={handleButtonClick}>Mettre à jour la base de données</button>
+      <div>
+        <h3>Modifications :</h3>
+        <ul>
+          {modifiedData.map((data, index) => (
+            <li key={index}>ID: {data.id}, Code: {data.reference}</li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }

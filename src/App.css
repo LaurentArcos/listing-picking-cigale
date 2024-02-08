@@ -43,7 +43,32 @@
 
 input {
   width: 20px;
-  margin: 0rem 2rem;
+  margin: 0rem 1.5rem;
+  text-align: center;
 }
 
 
+.bottom-right-button {
+  position: fixed;
+  bottom: 50px;
+  right: 50px;
+  padding: 20px;
+  background-color: #242424;
+  color: #ffffff;
+  border: 2px solid #007906;
+
+  cursor: pointer;
+  font-size: 16px;
+  max-width: 200px;
+  font-family: inherit;
+  font-weight: 600;
+}
+
+.bottom-right-button:hover {
+  background-color: #007906;
+  color: #ffffff;
+}
+
+.modified-row {
+  background-color: rgba(255, 0, 0, 0.562); 
+}
