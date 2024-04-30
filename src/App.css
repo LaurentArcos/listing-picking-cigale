@@ -72,3 +72,7 @@ input {
 .modified-row {
   background-color: rgba(255, 0, 0, 0.562); 
 }
+
+li {
+  list-style: none;
+}

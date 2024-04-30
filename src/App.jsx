@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
 import './App.css';
 
@@ -9,7 +9,6 @@ function App() {
   useEffect(() => {
     axios.get('https://seagale.fr/api/products?ws_key=24UCBP8LSPL5EWHZVI2VDSZMRSU7EITZ&filter[active]=[1]&display=full&output_format=JSON')
       .then(response => {
-        console.log(response.data); // Console log pour vérifier la réponse
         // Tri des produits par référence
         const sortedProducts = response.data.products.sort((a, b) => {
           const refA = a.reference.split('.');
@@ -43,7 +42,15 @@ function App() {
       return parseInt(refA[2], 10) - parseInt(refB[2], 10);
     });
     setProducts([...sortedProducts]); // Mise à jour des produits triés
-    setModifiedData(prevData => [...prevData, { id, reference }]);
+    
+    // Mettre à jour les données modifiées
+    setModifiedData(prevData => {
+      // Filtrer les données modifiées pour ne conserver que la dernière occurrence de chaque ID
+      const filteredData = prevData.filter(data => data.id !== id);
+      const newData = [...filteredData, { id, reference }];
+      console.log(newData); // Vérifier les nouvelles données
+      return newData;
+    });
   };
 
   useEffect(() => {
@@ -51,8 +58,43 @@ function App() {
   }, [modifiedData]);
 
   const handleButtonClick = () => {
-    // Action à exécuter lors du clic sur le bouton
-    console.log('Bouton cliqué !');
+    const confirmUpdate = window.confirm('Voulez-vous vraiment mettre à jour la base de données ?');
+    if (confirmUpdate) {
+      const uniqueModifiedData = modifiedData.reduce((acc, data) => {
+        if (!acc[data.id]) {
+          acc[data.id] = data;
+        }
+        return acc;
+      }, {});
+  
+      const uniqueModifiedDataArray = Object.values(uniqueModifiedData);
+      console.log(uniqueModifiedDataArray);
+  
+      uniqueModifiedDataArray.forEach(data => {
+        const { id, reference } = data;
+        console.log(reference);
+        console.log(id);
+        axios.post('https://seagale.fr/outils/boutique/back/change_product_reference.php', 
+          { 
+            product_id: id, 
+            new_reference: reference 
+          },
+          {
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded'
+            }
+          }
+        )
+          .then(response => {
+            console.log(response.data);
+          })
+          .catch(error => {
+            console.error('Erreur lors de l\'envoi des données au serveur', error);
+          });
+      });
+    } else {
+      console.log('Mise à jour annulée.');
+    }
   };
 
   return (
@@ -81,8 +123,9 @@ function App() {
                   <input
                     type="text"
                     defaultValue={zone}
+                    name="zone"
                     onBlur={(e) => {
-                      const newZone = e.target.value;
+                      const newZone = e.target.value.toUpperCase();
                       const newProducts = [...products];
                       newProducts[index].reference = `${newZone}.${famille}.${rang}`;
                       setProducts(newProducts);
@@ -94,6 +137,7 @@ function App() {
                   <input
                     type="text"
                     defaultValue={famille}
+                    name="famille"
                     onBlur={(e) => {
                       const newFamille = e.target.value;
                       const newProducts = [...products];
@@ -107,6 +151,7 @@ function App() {
                   <input
                     type="text"
                     defaultValue={rang}
+                    name="rang"
                     onBlur={(e) => {
                       const newRang = e.target.value;
                       const newProducts = [...products];
@@ -127,7 +172,7 @@ function App() {
         <h3>Modifications :</h3>
         <ul>
           {modifiedData.map((data, index) => (
-            <li key={index}>ID: {data.id}, Code: {data.reference}</li>
+            <li key={index}>Id: {data.id} - Reference: {data.reference}</li>
           ))}
         </ul>
       </div>
