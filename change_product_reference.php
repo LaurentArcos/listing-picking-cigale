@@ -1,8 +1,8 @@
 <?php
 
 define('DEBUG', true);
-define('PS_SHOP_PATH', 'https://seagale.fr/');
-define('PS_WS_AUTH_KEY', '24UCBP8LSPL5EWHZVI2VDSZMRSU7EITZ');
+//define('PS_SHOP_PATH', 'insérer url ici');
+//define('PS_WS_AUTH_KEY', 'insérer clé ici');
 require_once('PSWebServiceLibrary.php');
 
 // Initialiser le service web PrestaShop
